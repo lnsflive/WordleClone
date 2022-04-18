@@ -1,7 +1,13 @@
-# Vue 3 + Vite
+# Wordle Clone made with Vite + Vue3 + Tailwind
+This Wordle clone was made with Vite, Vue3, and Tailwind.
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
 
-## Recommended IDE Setup
+Visit official game at: [Wordle](https://jaimegonzalezjr.com/games/wordle).
 
-- [VS Code](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=johnsoncodehk.volar)
+
+## Built With 
+* Vite
+* Vue3
+* Tailwind CSS
+
+![Screenshot](https://github.com/lnsflive/WordleClone/blob/master/public/img/ss1.jpg)
