@@ -2,10 +2,10 @@
 import SimpleKeyboard from './components/SimpleKeyboard.vue';
 import { reactive, onMounted, computed} from 'vue'
 import WordRow from './components/WordRow.vue';
-import TickSoundSrc from './assets/tick.mp3'
-import SpinSoundSrc from './assets/spin.mp3'
-import WinSoundSrc from './assets/win.mp3'
-import LoseSoundSrc from './assets/lose.mp3'
+import TickSoundSrc from '/sounds/tick.mp3'
+import SpinSoundSrc from '/sounds/spin.mp3'
+import WinSoundSrc from '/sounds/win.mp3'
+import LoseSoundSrc from '/sounds/lose.mp3'
 
 let tick = new Audio(TickSoundSrc)
 let spin = new Audio(SpinSoundSrc)

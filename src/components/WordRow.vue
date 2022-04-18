@@ -1,9 +1,9 @@
 <script setup>
 import LetterBox from './LetterBox.vue';
 import {ref, watch} from "vue"
-import FoundSoundSrc from '/src/assets/spade.mp3'
-import SpinSoundSrc from '/src/assets/spin.mp3'
-import TieSoundSrc from '/src/assets/tie.mp3'
+import FoundSoundSrc from '/sounds/spade.mp3'
+import SpinSoundSrc from '/sounds/spin.mp3'
+import TieSoundSrc from '/sounds/tie.mp3'
 import { processSlotOutlet } from '@vue/compiler-core';
 
 const props = defineProps({
