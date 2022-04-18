@@ -75,22 +75,25 @@ const handleInput = (key) => {
   } else if(currentGuess.length < 5){
     const alphaRegex = /[a-zA-Z]/
     if(alphaRegex.test(key)){
-      state.guesses[state.currentGuessIndex] += key
+      state.guesses[state.currentGuessIndex] += key.toLowerCase()
       tick.play()
     }
   }
 }
 
 onMounted(() => {
+  let excludedKeys = ["Alt", "Shift", "Control", "Escape", "Tab", "CapsLock", "NumLock"]
   window.addEventListener("keyup", (e) => {
     e.preventDefault()
-    let key =
-      e.key == "Enter"
-        ? "{enter}"
-        : e.key == "Backspace"
-        ? "{bksp}"
-        : e.key
-    handleInput(key)
+    if(!excludedKeys.includes(e.key)){
+      let key =
+        e.key == "Enter"
+          ? "{enter}"
+          : e.key == "Backspace"
+          ? "{bksp}"
+          : e.key
+      handleInput(key)
+    }
   })
   state.solution = state.availableWords[Math.floor(Math.random() * state.availableWords.length)].toLowerCase()
   //console.log(state.solution)
