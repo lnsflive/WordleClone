@@ -56,6 +56,7 @@ const handleInput = (key) => {
 
   if(key == "{enter}"){
     if(currentGuess.length == 5){
+      state.error = ""
       if(state.hardMode){
         if(state.availableWords.includes(currentGuess)){
           state.currentGuessIndex++
@@ -71,6 +72,7 @@ const handleInput = (key) => {
           } 
           tick.play()
         }else{
+          state.error = "⚠️ Real Words only in Hard Mode!"
           return
         }
       }else{
@@ -163,8 +165,3 @@ onMounted(() => {
   </div>
 </template>
 
-<style>
-html{
-  background-color: black;
-}
-</style>
