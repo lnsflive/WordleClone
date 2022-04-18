@@ -7,7 +7,6 @@ import SpinSoundSrc from './assets/spin.mp3'
 import WinSoundSrc from './assets/win.mp3'
 import LoseSoundSrc from './assets/lose.mp3'
 
-
 let tick = new Audio(TickSoundSrc)
 let spin = new Audio(SpinSoundSrc)
 let win = new Audio(WinSoundSrc)
@@ -16,8 +15,10 @@ let lose = new Audio(LoseSoundSrc)
 const state = reactive({
   solution: "",
   guesses: ["","","","","",""],
-  availableWords: ["Aargh","Aback","Abaft","About","Above","Abuse","Accel","Acute","Adieu","Adios","Admit","Adopt","Adown","Adult","Afoot","Afore","Afoul","After","Again","Agape","Agent","Agree","Ahead","Ahull","Alack","Alcon","Alife","Alike","Aline","Alive","Allow","Aloft","Aloha","Alone","Along","Aloof","Aloud","Alter","Amiss","Among","Amply","Amuck","Anger","Angry","Apace","Apart","Apple","Apply","Aptly","Arear","Argue","Arise","Aside","Askew","Aught","Avast","Avoid","Award","Aware","Awful","Badly","Bakaw","Bally","Basic","Basis","Beach","Begin","Below","Birth","Black","Blame","Bless","Blige","Blind","Block","Blood","Board","Bothe","Brain","Brava","Brave","Bravo","Bread","Break","Brief","Bring","Broad","Brown","Build","Burst","Buyer","Canny","Carry","Catch","Cause","Chain","Chair","Cheap","Check","Chest","Chief","Child","China","Chook","Circa","Civil","Claim","Class","Clean","Clear","Climb","Clock","Close","Coach","Coast","Count","Court","Cover","Coyly","Crazy","Cream","Crime","Cross","Crowd","Crown","Cycle","Daily","Damme","Dance","Death","Depth","Dildo","Dimly","Dirty","Ditto","Doubt","Draft","Drama","Dream","Dress","Drily","Drink","Drive","Dryly","Dully","Early","Earth","Empty","Enemy","Enjoy","Enter","Entry","Equal","Error","Event","Exact","Exist","Extra","Faint","Faith","False","Fatly","Fault","Feyly","Field","Fifth","Fight","Final","First","Fitly","Floor","Focus","Force","Forte","Forth","Frame","Frank","Fresh","Frick","Front","Fruit","Fudge","Fully","Funny","Furth","Gaily","Gayly","Giant","Glass","Godly","Golly","Grand","Grant","Grass","Gratz","Great","Green","Gross","Group","Guess","Guide","Hallo","Haply","Happy","Harsh","Hasta","Havoc","Heart","Heavy","Hella","Hello","Hence","Henry","Horse","Hotel","Hotly","House","Howay","Howdy","Hullo","Human","Huzza","Icily","Ideal","Image","Imply","Index","Infra","Inner","Input","Issue","Japan","Jesus","Jildi","Joint","Jolly","Jones","Judge","Knife","Large","Laugh","Laura","Laxly","Layer","Learn","Leave","Legal","Lento","Level","Lewis","Light","Limit","Local","Loose","Lordy","Lowly","Lucky","Lunch","Madly","Magic","Major","March","Marry","Match","Maybe","Mercy","Metal","Minor","Minus","Model","Money","Month","Moral","Motor","Mouth","Music","Naked","Nasty","Naval","Neath","Never","Newly","Night","Nobly","Noise","North","Novel","Nurse","Occur","Oddly","Offer","Often","One’s","Order","Other","Ought","Outer","Owner","Panel","Paper","Party","Peace","Peter","Phase","Phone","Piano","Piece","Pilot","Pitch","Place","Plain","Plane","Plant","Plate","Plonk","Plumb","Point","Pound","Power","Press","Price","Pride","Prime","Prior","Prize","Proof","Proud","Prove","Psych","Queen","Queer","Quick","Quiet","Quite","Radio","Raise","Ramen","Range","Rapid","Ratio","Reach","Ready","Redly","Refer","Relax","Reply","Right","River","Roman","Rough","Round","Route","Royal","Rugby","Rural","Sadly","Salve","Scale","Scene","Scope","Score","Sense","Serve","Shall","Shape","Share","Sharp","Sheep","Sheer","Sheet","Shift","Shily","Shirt","Shock","Shoot","Short","Shyly","Sight","Silly","Simon","Since","Sixth","Skill","Slash","Sleek","Sleep","Slyly","Small","Smart","Smile","Smith","Smoke","Sniff","So-So","Solid","Solve","Sorry","Sound","South","Space","Spang","Spare","Speak","Speed","Spend","Spite","Split","Sport","Squad","Staff","Stage","Stand","Stark","Start","State","Steam","Steel","Steep","Stick","Still","Stock","Stone","Store","Study","Stuff","Style","Sugar","Super","Sweet","Table","Tally","Taste","Teach","Terry","Thame","Thank","Theme","There","Thiam","Thick","Thine","Thing","Think","Third","Throw","Thwap","Tight","Title","Today","Total","Touch","Tough","Tower","Track","Trade","Train","Treat","Trend","Trial","Truly","Trust","Truth","Twice","Uncle","Under","Union","Unity","Until","Upper","Upset","Urban","Usual","Utter","Vague","Valid","Value","Video","Viola","Visit","Vital","Voice","Wacko","Wanly","Waste","Watch","Water","Wetly","Where","Which","While","Whist","White","Whole","Whose","Whoso","Wilma","Wirra","Woman","Woops","World","Worry","Would","Wowie","Write","Wrong","Yecch","Yeeha","Yeesh","Young","Yours","Youth","Yowch","Zowie"],
+  availableWords: ["aargh", "aback", "abaft", "about", "above", "abuse", "accel", "actor", "acute", "adieu", "adios", "admit", "adopt", "adown", "adult", "afoot", "afore", "afoul", "after", "again", "agape", "agent", "agree", "ahead", "ahull", "alack", "alarm", "album", "alcon", "alert", "alife", "alike", "aline", "alive", "allow", "aloft", "aloha", "alone", "along", "aloof", "aloud", "alter", "amiss", "among", "amply", "amuck", "anger", "Angle", "angry", "apace", "apart", "apple", "apply", "aptly", "arear", "arena", "argue", "arise", "array", "aside", "askew", "asset", "audio", "audit", "aught", "avast", "avoid", "award", "aware", "awful", "badly", "bakaw", "baker", "bally", "bases", "basic", "basis", "beach", "began", "begin", "begun", "being", "below", "bench", "billy", "birth", "black", "blame", "bless", "blige", "blind", "block", "blood", "board", "boost", "booth", "bothe", "bound", "brain", "brand", "brava", "brave", "bravo", "bread", "break", "breed", "brief", "bring", "broad", "broke", "brown", "build", "built", "burst", "buyer", "cable", "calif", "canny", "carry", "catch", "cause", "chain", "chair", "chart", "chase", "cheap", "check", "chest", "chief", "child", "china", "chook", "chose", "circa", "civil", "claim", "class", "clean", "clear", "click", "climb", "clock", "close", "coach", "coast", "could", "count", "court", "cover", "coyly", "craft", "crash", "crazy", "cream", "crime", "cross", "crowd", "crown", "curve", "cycle", "daily", "damme", "dance", "dated", "dealt", "death", "debut", "delay", "depth", "dildo", "dimly", "dirty", "ditto", "doing", "doubt", "dozen", "draft", "drama", "drawn", "dream", "dress", "drill", "drily", "drink", "drive", "drove", "dryly", "dully", "dying", "eager", "early", "earth", "eight", "elite", "empty", "enemy", "enjoy", "enter", "entry", "equal", "error", "event", "every", "exact", "exist", "extra", "faint", "faith", "false", "fatly", "fault", "feyly", "fiber", "field", "fifth", "fifty", "fight", "final", "first", "fitly", "fixed", "flash", "fleet", "floor", "fluid", "focus", "force", "forte", "forth", "forty", "forum", "found", "frame", "frank", "fraud", "fresh", "frick", "front", "fruit", "fudge", "fully", "funky", "funny", "furth", "gaily", "gayly", "giant", "given", "glass", "globe", "godly", "going", "golly", "grace", "grade", "grand", "grant", "grass", "gratz", "great", "green", "gross", "group", "grown", "guard", "guess", "guest", "guide", "hallo", "haply", "happy", "harry", "harsh", "hasta", "havoc", "heart", "heavy", "hella", "hello", "hence", "henry", "horse", "hotel", "hotly", "house", "howay", "howdy", "hullo", "human", "huzza", "icily", "ideal", "image", "imply", "index", "infra", "inner", "input", "issue", "japan", "jesus", "jildi", "jimmy", "joint", "jolly", "jones", "judge", "knife", "known", "label", "large", "laser", "later", "laugh", "laura", "laxly", "layer", "learn", "lease", "least", "leave", "legal", "lento", "level", "lewis", "light", "limit", "links", "lives", "local", "logic", "loose", "lordy", "lower", "lowly", "lucky", "lunch", "lying", "madly", "magic", "major", "maker", "march", "maria", "marry", "match", "maybe", "mayor", "meant", "media", "mercy", "metal", "might", "minor", "minus", "mixed", "model", "money", "month", "moral", "motor", "mount", "mouse", "mouth", "movie", "music", "naked", "nasty", "naval", "neath", "needs", "never", "newly", "night", "nobly", "noise", "north", "noted", "novel", "nurse", "occur", "ocean", "oddly", "offer", "often", "one’s", "order", "other", "ought", "outer", "owner", "paint", "panel", "paper", "party", "peace", "peter", "phase", "phone", "photo", "piano", "piece", "pilot", "pitch", "place", "plain", "plane", "plant", "plate", "plonk", "plumb", "point", "pound", "power", "press", "price", "pride", "prime", "print", "prior", "prize", "proof", "proud", "prove", "psych", "queen", "queer", "quick", "quiet", "quite", "radio", "raise", "ramen", "range", "rapid", "ratio", "reach", "ready", "redly", "refer", "relax", "reply", "right", "rival", "river", "robin", "roger", "roman", "rough", "round", "route", "royal", "rugby", "rural", "sadly", "salve", "scale", "scene", "scope", "score", "sense", "serve", "seven", "shall", "shape", "share", "sharp", "sheep", "sheer", "sheet", "shelf", "shell", "shift", "shily", "shirt", "shock", "shoot", "short", "shown", "shyly", "sight", "silly", "simon", "since", "sixth", "sixty", "sized", "skill", "slash", "sleek", "sleep", "slide", "slyly", "small", "smart", "smile", "smith", "smoke", "sniff", "so-so", "solid", "solve", "sorry", "sound", "south", "space", "spang", "spare", "speak", "speed", "spend", "spent", "spite", "split", "spoke", "sport", "squad", "staff", "stage", "stake", "stand", "stark", "start", "state", "steam", "steel", "steep", "stick", "still", "stock", "stone", "stood", "store", "storm", "story", "strip", "stuck", "study", "stuff", "style", "sugar", "suite", "super", "sweet", "table", "taken", "tally", "taste", "taxes", "teach", "teeth", "terry", "texas", "thame", "thank", "theft", "their", "theme", "there", "these", "thiam", "thick", "thine", "thing", "think", "third", "those", "three", "threw", "throw", "thwap", "tight", "times", "tired", "title", "today", "topic", "total", "touch", "tough", "tower", "track", "trade", "train", "treat", "trend", "trial", "tried", "tries", "truck", "truly", "trust", "truth", "twice", "uncle", "under", "undue", "union", "unity", "until", "upper", "upset", "urban", "usage", "usual", "utter", "vague", "valid", "value", "video", "viola", "virus", "visit", "vital", "voice", "wacko", "wanly", "waste", "watch", "water", "wetly", "wheel", "where", "which", "while", "whist", "white", "whole", "whose", "whoso", "wilma", "wirra", "woman", "women", "woops", "world", "worry", "worse", "worst", "worth", "would", "wound", "wowie", "write", "wrong", "wrote", "yecch", "yeeha", "yeesh", "yield", "young", "yours", "youth", "yowch", "zowie"],
   currentGuessIndex: 0,
+  hardMode: false,
+  error: "",
   guessedLetters: {
     miss: [],
     found: [],
@@ -55,18 +56,37 @@ const handleInput = (key) => {
 
   if(key == "{enter}"){
     if(currentGuess.length == 5){
-      state.currentGuessIndex++
-      for(var i = 0; i < currentGuess.length; i++){
-        let c = currentGuess.charAt(i)
-        if(c == state.solution.charAt(i)){
-          state.guessedLetters.found.push(c)
-        } else if(state.solution.indexOf(c) != -1){
-          state.guessedLetters.hint.push(c)
-        } else{
-          state.guessedLetters.miss.push(c)
+      if(state.hardMode){
+        if(state.availableWords.includes(currentGuess)){
+          state.currentGuessIndex++
+          for(var i = 0; i < currentGuess.length; i++){
+            let c = currentGuess.charAt(i)
+            if(c == state.solution.charAt(i)){
+              state.guessedLetters.found.push(c)
+            } else if(state.solution.indexOf(c) != -1){
+              state.guessedLetters.hint.push(c)
+            } else{
+              state.guessedLetters.miss.push(c)
+            }
+          } 
+          tick.play()
+        }else{
+          return
         }
+      }else{
+        state.currentGuessIndex++
+        for(var i = 0; i < currentGuess.length; i++){
+          let c = currentGuess.charAt(i)
+          if(c == state.solution.charAt(i)){
+            state.guessedLetters.found.push(c)
+          } else if(state.solution.indexOf(c) != -1){
+            state.guessedLetters.hint.push(c)
+          } else{
+            state.guessedLetters.miss.push(c)
+          }
+        } 
+        tick.play()
       }
-      tick.play()
     }
   } else if (key == "{bksp}"){
     state.guesses[state.currentGuessIndex] = 
@@ -101,13 +121,19 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex flex-col h-screen max-w-md mx-auto justify-evenly">
-    <div class="text-center">
+  <div class="bg-white flex flex-col h-screen max-w-md mx-auto justify-evenly">
+    <div class="grid grid-cols-2 gap-8 px-16">
       <button
-        class="bg-green-600 text-white rounded px-8 py-3 font-bold"
+        class="bg-green-600 text-white rounded py-4 font-bold"
         @click="refreshPage()"
       >
         Play Again?
+      </button>
+      <button
+        class="bg-red-500 text-white rounded py-4 font-bold"
+        @click="state.hardMode = !state.hardMode"
+      >
+        Hard Mode: {{state.hardMode ? 'Y' : 'N'}}
       </button>
     </div>
     <div>
@@ -119,12 +145,15 @@ onMounted(() => {
         :submitted="i < state.currentGuessIndex"
       />
     </div>
-    <div class="text-center">
+    <div class="text-center rounded mx-16">
       <p v-if="wonGame">
         🏆 Congrats you solved it!
       </p>
       <p v-else-if="lostGame">
       😔 Out of tries. Word was "{{state.solution}}"
+      </p>
+      <p v-else :class="[state.error ? 'text-black':'text-white']">
+        {{state.error ? state.error : '.'}}
       </p>
     </div>
     <simple-keyboard
@@ -135,5 +164,7 @@ onMounted(() => {
 </template>
 
 <style>
-
+html{
+  background-color: black;
+}
 </style>

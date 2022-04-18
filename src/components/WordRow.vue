@@ -4,6 +4,7 @@ import {ref, watch} from "vue"
 import FoundSoundSrc from '/src/assets/spade.mp3'
 import SpinSoundSrc from '/src/assets/spin.mp3'
 import TieSoundSrc from '/src/assets/tie.mp3'
+import { processSlotOutlet } from '@vue/compiler-core';
 
 const props = defineProps({
     value: String,
@@ -25,6 +26,7 @@ watch(
         if(props.submitted){
             let s = props.solution
             let v = props.value
+
             let temp = ["gray", "gray", "gray", "gray", "gray", "gray"]
             let letterPool = []
             for(let i = 0; i< 5; i++){

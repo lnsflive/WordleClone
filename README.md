@@ -1,7 +1,7 @@
 # Wordle Clone made with Vite + Vue3 + Tailwind
 ### This Wordle clone was made with Vite, Vue3, and Tailwind.
 
-## **Custom 513 Wordlist**
+## **Custom 655 Wordlist**
 
 
 *Play my game at: [Wordle](https://jaimegonzalezjr.com/games/wordle).*
