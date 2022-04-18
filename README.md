@@ -1,11 +1,13 @@
 # Wordle Clone made with Vite + Vue3 + Tailwind
-This Wordle clone was made with Vite, Vue3, and Tailwind.
+### This Wordle clone was made with Vite, Vue3, and Tailwind.
+
+## **Custom 513 Wordlist**
 
 
-Visit official game at: [Wordle](https://jaimegonzalezjr.com/games/wordle).
+*Play my game at: [Wordle](https://jaimegonzalezjr.com/games/wordle).*
 
 
-## Built With 
+## **Built With**
 * Vite
 * Vue3
 * Tailwind CSS
