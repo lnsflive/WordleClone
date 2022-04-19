@@ -113,6 +113,7 @@ const handleInput = (key) => {
 }
 
 onMounted(() => {
+  console.log(state.availableWords.length)
   let excludedKeys = ["Alt", "Shift", "Control", "Escape", "Tab", "CapsLock", "NumLock"]
   window.addEventListener("keyup", (e) => {
     e.preventDefault()
@@ -133,15 +134,21 @@ onMounted(() => {
 
 <template>
   <div class="bg-white flex flex-col h-screen max-w-md mx-auto justify-evenly">
-    <div class="grid grid-cols-2 gap-8 px-16">
+    <div class="grid grid-cols-6">
       <button
-        class="bg-green-600 text-white rounded py-4 font-bold"
+        class="bg-green-600 text-white rounded p-4 font-bold col-span-2 mx-auto"
         @click="refreshPage()"
       >
         Play Again?
       </button>
+      <div class="flex justify-center col-span-2">
+      <a class="myBtn" href="https://jaimegonzalezjr.com">
+          <div class="myBtnTeal" />
+          <div class="myBtnPurple" />
+      </a>
+    </div>
       <div
-        class="text-center cursor-pointer text-white rounded py-4 font-bold :focus-visible"
+        class="text-center cursor-pointer text-white rounded flex items-center p-4 font-bold col-span-2 mx-auto"
         @click="state.hardMode = !state.hardMode"
         :class="[state.hardMode ? 'bg-red-500' : 'bg-orange-500']"
       >
@@ -175,3 +182,59 @@ onMounted(() => {
   </div>
 </template>
 
+<style scoped>
+.logo{
+  position:absolute;
+  top: 0;
+  left: 48%;
+}
+.myBtn{
+  width: 90px;
+  height: 90px;
+  position: relative;
+  cursor: pointer;
+  transform: scale(0.7);
+}
+
+.myBtnTeal, .myBtnPurple{
+  width: 60px;
+  height: 60px;
+  position: absolute;
+  transition: all 0.5s ease-in-out;
+}
+
+.myBtnTeal{
+  background-color: #3bf2c4;
+  transform: translate(35px, 35px);
+}
+.myBtnTeal::before{
+  content:"G";
+  height:100%;
+  font-size:2rem;
+  font-weight: bold;
+  display:flex;
+  justify-content: center;
+  align-items: center;
+}
+.myBtn:hover > .myBtnTeal{
+  transform: translate(40px, 40px);
+}
+
+.myBtnPurple{
+  background-color: #7772b1;
+  transform: translate(-5px, -5px);
+}
+
+.myBtnPurple::before{
+  content:"J";
+  height:100%;
+  font-size:2rem;
+  font-weight: bold;
+  display:flex;
+  justify-content: center;
+  align-items: center;
+}
+.myBtn:hover > .myBtnPurple{
+  transform: translate(-10px, -10px);
+}
+</style>
