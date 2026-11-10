@@ -15,6 +15,10 @@ export function gameHasProgress(currentGuessIndex, currentGuess) {
   return currentGuessIndex > 0 || currentGuess.length > 0;
 }
 
+export function shouldSubmitInsteadOfButton(currentGuess, currentGuessIndex, won) {
+  return currentGuess.length === 5 && currentGuessIndex < 6 && !won;
+}
+
 export function normalizeKey(key) {
   if (key === "{enter}" || key === "Enter") return "{enter}";
   if (key === "{bksp}" || key === "Backspace") return "{bksp}";

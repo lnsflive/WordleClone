@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { gameHasProgress, normalizeKey } from "./game.js";
+import { gameHasProgress, normalizeKey, shouldSubmitInsteadOfButton } from "./game.js";
 
 test("normalizeKey accepts a single letter and lowercases it", () => {
   assert.equal(normalizeKey("A"), "a");
@@ -12,6 +12,14 @@ test("normalizeKey maps enter and backspace from the keyboard and the on-screen 
   assert.equal(normalizeKey("{enter}"), "{enter}");
   assert.equal(normalizeKey("Backspace"), "{bksp}");
   assert.equal(normalizeKey("{bksp}"), "{bksp}");
+});
+
+test("shouldSubmitInsteadOfButton keeps Enter for a finished guess", () => {
+  assert.equal(shouldSubmitInsteadOfButton("crane", 0, false), true);
+  assert.equal(shouldSubmitInsteadOfButton("cat", 0, false), false);
+  assert.equal(shouldSubmitInsteadOfButton("", 0, false), false);
+  assert.equal(shouldSubmitInsteadOfButton("crane", 6, false), false);
+  assert.equal(shouldSubmitInsteadOfButton("crane", 1, true), false);
 });
 
 test("gameHasProgress asks for a new game only after the round has started", () => {

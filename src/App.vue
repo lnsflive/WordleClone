@@ -6,7 +6,7 @@ import TickSoundSrc from '/sounds/tick.mp3'
 import WinSoundSrc from '/sounds/win.mp3'
 import LoseSoundSrc from '/sounds/lose.mp3'
 import WordList from './assets/wordlist.json'
-import { gameHasProgress, normalizeKey } from './game.js'
+import { gameHasProgress, normalizeKey, shouldSubmitInsteadOfButton } from './game.js'
 
 const HARD_MODE_KEY = "wordle-hard-mode"
 
@@ -21,8 +21,9 @@ const readHardMode = () => {
 const writeHardMode = (enabled) => {
   try {
     localStorage.setItem(HARD_MODE_KEY, enabled ? "1" : "0")
+    return true
   } catch {
-    // Private browsing can block storage. The in-memory flag still applies.
+    return false
   }
 }
 
@@ -32,6 +33,7 @@ let lose = new Audio(LoseSoundSrc)
 let errorTimer = 0
 const confirmHardMode = ref(false)
 const cancelButton = ref(null)
+const roundId = ref(0)
 
 const play = (audio) => {
   audio.play().catch(() => {})
@@ -68,8 +70,23 @@ watch(lostGame, (lost) => {
   if (lost) play(lose)
 })
 
+const pickSolution = () => {
+  const words = state.availableWords
+  return words[Math.floor(Math.random() * words.length)].toLowerCase()
+}
+
+const resetRound = () => {
+  state.solution = pickSolution()
+  state.guesses = ["", "", "", "", "", ""]
+  state.currentGuessIndex = 0
+  state.error = ""
+  state.guessedLetters = { miss: [], found: [], hint: [] }
+  window.clearTimeout(errorTimer)
+  roundId.value += 1
+}
+
 const refreshPage = () => {
-  window.location.reload();
+  resetRound()
 }
 
 const cancelHardModeSwitch = () => {
@@ -77,15 +94,18 @@ const cancelHardModeSwitch = () => {
 }
 
 const confirmHardModeSwitch = () => {
-  writeHardMode(!state.hardMode)
-  window.location.reload()
+  state.hardMode = !state.hardMode
+  writeHardMode(state.hardMode)
+  confirmHardMode.value = false
+  resetRound()
 }
 
-const requestHardModeToggle = () => {
+const requestHardModeToggle = (event) => {
   const currentGuess = state.guesses[state.currentGuessIndex] || ""
   if (!gameHasProgress(state.currentGuessIndex, currentGuess)) {
     state.hardMode = !state.hardMode
     writeHardMode(state.hardMode)
+    event?.currentTarget?.blur?.()
     return
   }
   confirmHardMode.value = true
@@ -153,6 +173,16 @@ const handleInput = (key) => {
   }
 }
 
+const onKeyDown = (event) => {
+  if (confirmHardMode.value || event.key !== "Enter") return
+  const hardModeButton = event.target?.closest?.("[data-hard-mode]")
+  if (!hardModeButton) return
+  const currentGuess = state.guesses[state.currentGuessIndex] || ""
+  if (shouldSubmitInsteadOfButton(currentGuess, state.currentGuessIndex, wonGame.value)) {
+    event.preventDefault()
+  }
+}
+
 const onKeyUp = (event) => {
   if (confirmHardMode.value) {
     if (event.key === "Escape") cancelHardModeSwitch()
@@ -164,12 +194,13 @@ const onKeyUp = (event) => {
 }
 
 onMounted(() => {
+  window.addEventListener("keydown", onKeyDown)
   window.addEventListener("keyup", onKeyUp)
-  const words = state.availableWords
-  state.solution = words[Math.floor(Math.random() * words.length)].toLowerCase()
+  state.solution = pickSolution()
 })
 
 onUnmounted(() => {
+  window.removeEventListener("keydown", onKeyDown)
   window.removeEventListener("keyup", onKeyUp)
   window.clearTimeout(errorTimer)
 })
@@ -192,6 +223,7 @@ onUnmounted(() => {
     </div>
       <button
         type="button"
+        data-hard-mode
         class="text-center cursor-pointer text-white rounded flex items-center p-4 font-bold col-span-2 mx-auto border-0"
         @click="requestHardModeToggle"
         :class="[state.hardMode ? 'bg-red-500' : 'bg-orange-500']"
@@ -202,7 +234,7 @@ onUnmounted(() => {
     <div>
       <word-row
         v-for="(guess, i) in state.guesses"
-        :key="i"
+        :key="`${roundId}-${i}`"
         :value="guess"
         :solution="state.solution"
         :submitted="i < state.currentGuessIndex"
@@ -220,6 +252,7 @@ onUnmounted(() => {
       </p>
     </div>
     <simple-keyboard
+      :key="roundId"
       @onKeyPress="handleInput"
       :guessedLetters="state.guessedLetters"
     />
