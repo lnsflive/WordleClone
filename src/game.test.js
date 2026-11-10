@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { normalizeKey } from "./game.js";
+import { gameHasProgress, normalizeKey } from "./game.js";
 
 test("normalizeKey accepts a single letter and lowercases it", () => {
   assert.equal(normalizeKey("A"), "a");
@@ -12,6 +12,13 @@ test("normalizeKey maps enter and backspace from the keyboard and the on-screen 
   assert.equal(normalizeKey("{enter}"), "{enter}");
   assert.equal(normalizeKey("Backspace"), "{bksp}");
   assert.equal(normalizeKey("{bksp}"), "{bksp}");
+});
+
+test("gameHasProgress asks for a new game only after the round has started", () => {
+  assert.equal(gameHasProgress(0, ""), false);
+  assert.equal(gameHasProgress(0, "ab"), true);
+  assert.equal(gameHasProgress(1, ""), true);
+  assert.equal(gameHasProgress(6, ""), true);
 });
 
 test("normalizeKey ignores modifier, navigation, and multi-character keys", () => {

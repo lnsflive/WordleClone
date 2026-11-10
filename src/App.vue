@@ -1,17 +1,37 @@
 <script setup>
 import SimpleKeyboard from './components/SimpleKeyboard.vue';
-import { reactive, onMounted, onUnmounted, computed, watch } from 'vue'
+import { reactive, ref, onMounted, onUnmounted, computed, watch, nextTick } from 'vue'
 import WordRow from './components/WordRow.vue';
 import TickSoundSrc from '/sounds/tick.mp3'
 import WinSoundSrc from '/sounds/win.mp3'
 import LoseSoundSrc from '/sounds/lose.mp3'
 import WordList from './assets/wordlist.json'
-import { normalizeKey } from './game.js'
+import { gameHasProgress, normalizeKey } from './game.js'
+
+const HARD_MODE_KEY = "wordle-hard-mode"
+
+const readHardMode = () => {
+  try {
+    return localStorage.getItem(HARD_MODE_KEY) === "1"
+  } catch {
+    return false
+  }
+}
+
+const writeHardMode = (enabled) => {
+  try {
+    localStorage.setItem(HARD_MODE_KEY, enabled ? "1" : "0")
+  } catch {
+    // Private browsing can block storage. The in-memory flag still applies.
+  }
+}
 
 let tick = new Audio(TickSoundSrc)
 let win = new Audio(WinSoundSrc)
 let lose = new Audio(LoseSoundSrc)
 let errorTimer = 0
+const confirmHardMode = ref(false)
+const cancelButton = ref(null)
 
 const play = (audio) => {
   audio.play().catch(() => {})
@@ -22,7 +42,7 @@ const state = reactive({
   guesses: ["","","","","",""],
   availableWords: WordList.words,
   currentGuessIndex: 0,
-  hardMode: false,
+  hardMode: readHardMode(),
   error: "",
   guessedLetters: {
     miss: [],
@@ -52,6 +72,31 @@ const refreshPage = () => {
   window.location.reload();
 }
 
+const cancelHardModeSwitch = () => {
+  confirmHardMode.value = false
+}
+
+const confirmHardModeSwitch = () => {
+  writeHardMode(!state.hardMode)
+  window.location.reload()
+}
+
+const requestHardModeToggle = () => {
+  const currentGuess = state.guesses[state.currentGuessIndex] || ""
+  if (!gameHasProgress(state.currentGuessIndex, currentGuess)) {
+    state.hardMode = !state.hardMode
+    writeHardMode(state.hardMode)
+    return
+  }
+  confirmHardMode.value = true
+}
+
+watch(confirmHardMode, async (open) => {
+  if (!open) return
+  await nextTick()
+  cancelButton.value?.focus()
+})
+
 const showError = (message) => {
   state.error = message
   window.clearTimeout(errorTimer)
@@ -76,7 +121,7 @@ const recordGuess = (currentGuess) => {
 }
 
 const handleInput = (key) => {
-  if (state.currentGuessIndex >= 6 || wonGame.value) {
+  if (confirmHardMode.value || state.currentGuessIndex >= 6 || wonGame.value) {
     return
   }
 
@@ -109,6 +154,11 @@ const handleInput = (key) => {
 }
 
 const onKeyUp = (event) => {
+  if (confirmHardMode.value) {
+    if (event.key === "Escape") cancelHardModeSwitch()
+    event.preventDefault()
+    return
+  }
   event.preventDefault()
   handleInput(event.key)
 }
@@ -140,13 +190,14 @@ onUnmounted(() => {
           <div class="myBtnPurple" />
       </a>
     </div>
-      <div
-        class="text-center cursor-pointer text-white rounded flex items-center p-4 font-bold col-span-2 mx-auto"
-        @click="state.hardMode = !state.hardMode"
+      <button
+        type="button"
+        class="text-center cursor-pointer text-white rounded flex items-center p-4 font-bold col-span-2 mx-auto border-0"
+        @click="requestHardModeToggle"
         :class="[state.hardMode ? 'bg-red-500' : 'bg-orange-500']"
       >
         Hard Mode: {{state.hardMode ? 'Y' : 'N'}}
-      </div>
+      </button>
     </div>
     <div>
       <word-row
@@ -172,6 +223,40 @@ onUnmounted(() => {
       @onKeyPress="handleInput"
       :guessedLetters="state.guessedLetters"
     />
+    <div
+      v-if="confirmHardMode"
+      class="fixed inset-0 z-20 flex items-center justify-center bg-black/40 px-6"
+      @click.self="cancelHardModeSwitch"
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="hard-mode-title"
+        class="w-full max-w-sm rounded bg-white p-6 text-center shadow-lg"
+      >
+        <h2 id="hard-mode-title" class="text-lg font-bold">Start a new game?</h2>
+        <p class="mt-2 text-sm text-gray-700">
+          Hard mode is for the whole puzzle. Switching it clears this board and picks a new word.
+        </p>
+        <div class="mt-5 flex justify-center gap-3">
+          <button
+            ref="cancelButton"
+            type="button"
+            class="rounded bg-gray-200 px-4 py-2 font-bold"
+            @click="cancelHardModeSwitch"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="rounded bg-green-600 px-4 py-2 font-bold text-white"
+            @click="confirmHardModeSwitch"
+          >
+            New game
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
