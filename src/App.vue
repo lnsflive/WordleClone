@@ -85,8 +85,9 @@ const resetRound = () => {
   roundId.value += 1
 }
 
-const refreshPage = () => {
+const refreshPage = (event) => {
   resetRound()
+  event?.currentTarget?.blur?.()
 }
 
 const cancelHardModeSwitch = () => {
@@ -175,8 +176,8 @@ const handleInput = (key) => {
 
 const onKeyDown = (event) => {
   if (confirmHardMode.value || event.key !== "Enter") return
-  const hardModeButton = event.target?.closest?.("[data-hard-mode]")
-  if (!hardModeButton) return
+  const gameControl = event.target?.closest?.("[data-game-control]")
+  if (!gameControl) return
   const currentGuess = state.guesses[state.currentGuessIndex] || ""
   if (shouldSubmitInsteadOfButton(currentGuess, state.currentGuessIndex, wonGame.value)) {
     event.preventDefault()
@@ -210,8 +211,10 @@ onUnmounted(() => {
   <div class="bg-white flex flex-col h-screen max-w-md mx-auto justify-evenly">
     <div class="grid grid-cols-6">
       <button
-        class="bg-green-600 text-white rounded p-4 font-bold col-span-2 mx-auto"
-        @click="refreshPage()"
+        type="button"
+        data-game-control
+        class="bg-green-600 text-white rounded p-4 font-bold col-span-2 mx-auto border-0"
+        @click="refreshPage"
       >
         Play Again?
       </button>
@@ -223,7 +226,7 @@ onUnmounted(() => {
     </div>
       <button
         type="button"
-        data-hard-mode
+        data-game-control
         class="text-center cursor-pointer text-white rounded flex items-center p-4 font-bold col-span-2 mx-auto border-0"
         @click="requestHardModeToggle"
         :class="[state.hardMode ? 'bg-red-500' : 'bg-orange-500']"
