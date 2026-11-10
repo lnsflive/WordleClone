@@ -19,6 +19,16 @@ export function shouldSubmitInsteadOfButton(currentGuess, currentGuessIndex, won
   return currentGuess.length === 5 && currentGuessIndex < 6 && !won;
 }
 
+export function trackDialogEnter(swallowEnterUp, { type, key, dialogOpen, repeat }) {
+  if (key !== "Enter") return { swallowEnterUp, ignore: false };
+  if (type === "down" && dialogOpen) return { swallowEnterUp: true, ignore: false };
+  if (type === "down" && swallowEnterUp && !dialogOpen && !repeat) {
+    return { swallowEnterUp: false, ignore: false };
+  }
+  if (type === "up" && swallowEnterUp) return { swallowEnterUp: false, ignore: true };
+  return { swallowEnterUp, ignore: false };
+}
+
 export function normalizeKey(key) {
   if (key === "{enter}" || key === "Enter") return "{enter}";
   if (key === "{bksp}" || key === "Backspace") return "{bksp}";

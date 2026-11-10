@@ -6,7 +6,7 @@ import TickSoundSrc from '/sounds/tick.mp3'
 import WinSoundSrc from '/sounds/win.mp3'
 import LoseSoundSrc from '/sounds/lose.mp3'
 import WordList from './assets/wordlist.json'
-import { gameHasProgress, normalizeKey, shouldSubmitInsteadOfButton } from './game.js'
+import { gameHasProgress, normalizeKey, shouldSubmitInsteadOfButton, trackDialogEnter } from './game.js'
 
 const HARD_MODE_KEY = "wordle-hard-mode"
 
@@ -31,6 +31,7 @@ let tick = new Audio(TickSoundSrc)
 let win = new Audio(WinSoundSrc)
 let lose = new Audio(LoseSoundSrc)
 let errorTimer = 0
+let swallowEnterUp = false
 const confirmHardMode = ref(false)
 const cancelButton = ref(null)
 const roundId = ref(0)
@@ -174,7 +175,19 @@ const handleInput = (key) => {
   }
 }
 
+const noteEnter = (type, event) => {
+  const next = trackDialogEnter(swallowEnterUp, {
+    type,
+    key: event.key,
+    dialogOpen: confirmHardMode.value,
+    repeat: event.repeat,
+  })
+  swallowEnterUp = next.swallowEnterUp
+  return next.ignore
+}
+
 const onKeyDown = (event) => {
+  noteEnter("down", event)
   if (confirmHardMode.value || event.key !== "Enter") return
   const gameControl = event.target?.closest?.("[data-game-control]")
   if (!gameControl) return
@@ -185,6 +198,10 @@ const onKeyDown = (event) => {
 }
 
 const onKeyUp = (event) => {
+  if (noteEnter("up", event)) {
+    event.preventDefault()
+    return
+  }
   if (confirmHardMode.value) {
     if (event.key === "Escape") cancelHardModeSwitch()
     event.preventDefault()

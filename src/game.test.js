@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { gameHasProgress, normalizeKey, shouldSubmitInsteadOfButton } from "./game.js";
+import { gameHasProgress, normalizeKey, shouldSubmitInsteadOfButton, trackDialogEnter } from "./game.js";
 
 test("normalizeKey accepts a single letter and lowercases it", () => {
   assert.equal(normalizeKey("A"), "a");
@@ -20,6 +20,26 @@ test("shouldSubmitInsteadOfButton keeps Enter for a finished guess", () => {
   assert.equal(shouldSubmitInsteadOfButton("", 0, false), false);
   assert.equal(shouldSubmitInsteadOfButton("crane", 6, false), false);
   assert.equal(shouldSubmitInsteadOfButton("crane", 1, true), false);
+});
+
+test("trackDialogEnter ignores the Enter release that closes the dialog", () => {
+  const down = trackDialogEnter(false, { type: "down", key: "Enter", dialogOpen: true, repeat: false });
+  assert.equal(down.swallowEnterUp, true);
+  assert.equal(down.ignore, false);
+
+  const up = trackDialogEnter(down.swallowEnterUp, { type: "up", key: "Enter", dialogOpen: false, repeat: false });
+  assert.equal(up.ignore, true);
+  assert.equal(up.swallowEnterUp, false);
+
+  const next = trackDialogEnter(up.swallowEnterUp, { type: "up", key: "Enter", dialogOpen: false, repeat: false });
+  assert.equal(next.ignore, false);
+});
+
+test("trackDialogEnter does not let a held Enter clear the swallowed release", () => {
+  const held = trackDialogEnter(true, { type: "down", key: "Enter", dialogOpen: false, repeat: true });
+  assert.equal(held.swallowEnterUp, true);
+  const fresh = trackDialogEnter(true, { type: "down", key: "Enter", dialogOpen: false, repeat: false });
+  assert.equal(fresh.swallowEnterUp, false);
 });
 
 test("gameHasProgress asks for a new game only after the round has started", () => {
