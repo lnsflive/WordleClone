@@ -4,7 +4,6 @@ import {ref, watch} from "vue"
 import FoundSoundSrc from '/sounds/spade.mp3'
 import SpinSoundSrc from '/sounds/spin.mp3'
 import TieSoundSrc from '/sounds/tie.mp3'
-import { processSlotOutlet } from '@vue/compiler-core';
 
 const props = defineProps({
     value: String,
@@ -12,12 +11,12 @@ const props = defineProps({
     submitted: Boolean
 })
 
-const colors = ref(["","","","","",""])
+const colors = ref(["", "", "", "", ""])
 
 const playSound = (elem) => {
-    let found = new Audio(elem)
+    const found = new Audio(elem)
     found.load()
-    found.play()
+    found.play().catch(() => {})
 }
 
 watch(
@@ -27,7 +26,7 @@ watch(
             let s = props.solution
             let v = props.value
 
-            let temp = ["gray", "gray", "gray", "gray", "gray", "gray"]
+            let temp = ["gray", "gray", "gray", "gray", "gray"]
             let letterPool = []
             for(let i = 0; i< 5; i++){
                 if(s.charAt(i) == v.charAt(i)){
