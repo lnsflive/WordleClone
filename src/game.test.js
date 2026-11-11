@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { gameHasProgress, normalizeKey, shouldSubmitInsteadOfButton, trackDialogEnter } from "./game.js";
+import { gameHasProgress, normalizeKey, shouldSubmitInsteadOfButton, trackDialogEnter, trapTab } from "./game.js";
 
 test("normalizeKey accepts a single letter and lowercases it", () => {
   assert.equal(normalizeKey("A"), "a");
@@ -40,6 +40,14 @@ test("trackDialogEnter does not let a held Enter clear the swallowed release", (
   assert.equal(held.swallowEnterUp, true);
   const fresh = trackDialogEnter(true, { type: "down", key: "Enter", dialogOpen: false, repeat: false });
   assert.equal(fresh.swallowEnterUp, false);
+});
+
+test("trapTab keeps Tab inside the confirmation buttons", () => {
+  assert.deepEqual(trapTab(1, 2, false, true), { prevent: true, index: 0 });
+  assert.deepEqual(trapTab(0, 2, true, true), { prevent: true, index: 1 });
+  assert.deepEqual(trapTab(0, 2, false, true), { prevent: false, index: 0 });
+  assert.deepEqual(trapTab(-1, 2, false, false), { prevent: true, index: 0 });
+  assert.deepEqual(trapTab(-1, 2, true, false), { prevent: true, index: 1 });
 });
 
 test("gameHasProgress asks for a new game only after the round has started", () => {

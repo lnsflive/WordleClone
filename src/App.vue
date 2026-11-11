@@ -6,7 +6,7 @@ import TickSoundSrc from '/sounds/tick.mp3'
 import WinSoundSrc from '/sounds/win.mp3'
 import LoseSoundSrc from '/sounds/lose.mp3'
 import WordList from './assets/wordlist.json'
-import { gameHasProgress, normalizeKey, shouldSubmitInsteadOfButton, trackDialogEnter } from './game.js'
+import { gameHasProgress, normalizeKey, shouldSubmitInsteadOfButton, trackDialogEnter, trapTab } from './game.js'
 
 const HARD_MODE_KEY = "wordle-hard-mode"
 
@@ -34,6 +34,7 @@ let errorTimer = 0
 let swallowEnterUp = false
 const confirmHardMode = ref(false)
 const cancelButton = ref(null)
+const dialogPanel = ref(null)
 const roundId = ref(0)
 
 const play = (audio) => {
@@ -87,6 +88,7 @@ const resetRound = () => {
 }
 
 const refreshPage = (event) => {
+  if (confirmHardMode.value) return
   resetRound()
   event?.currentTarget?.blur?.()
 }
@@ -103,6 +105,7 @@ const confirmHardModeSwitch = () => {
 }
 
 const requestHardModeToggle = (event) => {
+  if (confirmHardMode.value) return
   const currentGuess = state.guesses[state.currentGuessIndex] || ""
   if (!gameHasProgress(state.currentGuessIndex, currentGuess)) {
     state.hardMode = !state.hardMode
@@ -186,8 +189,27 @@ const noteEnter = (type, event) => {
   return next.ignore
 }
 
+const dialogButtons = () => {
+  const panel = dialogPanel.value
+  return panel ? [...panel.querySelectorAll("button")] : []
+}
+
 const onKeyDown = (event) => {
   noteEnter("down", event)
+  if (confirmHardMode.value && event.key === "Tab") {
+    const buttons = dialogButtons()
+    const index = buttons.indexOf(document.activeElement)
+    const decision = trapTab(index, buttons.length, event.shiftKey, index !== -1)
+    if (decision.prevent) {
+      event.preventDefault()
+      buttons[decision.index]?.focus()
+    }
+    return
+  }
+  if (confirmHardMode.value && (event.key === "Enter" || event.key === " ")) {
+    if (!dialogPanel.value?.contains(document.activeElement)) event.preventDefault()
+    return
+  }
   if (confirmHardMode.value || event.key !== "Enter") return
   const gameControl = event.target?.closest?.("[data-game-control]")
   if (!gameControl) return
@@ -225,7 +247,11 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="bg-white flex flex-col h-screen max-w-md mx-auto justify-evenly">
+  <div class="bg-white h-screen max-w-md mx-auto">
+    <div
+      class="flex h-full flex-col justify-evenly"
+      :inert="confirmHardMode || null"
+    >
     <div class="grid grid-cols-6">
       <button
         type="button"
@@ -276,12 +302,14 @@ onUnmounted(() => {
       @onKeyPress="handleInput"
       :guessedLetters="state.guessedLetters"
     />
+    </div>
     <div
       v-if="confirmHardMode"
       class="fixed inset-0 z-20 flex items-center justify-center bg-black/40 px-6"
       @click.self="cancelHardModeSwitch"
     >
       <div
+        ref="dialogPanel"
         role="dialog"
         aria-modal="true"
         aria-labelledby="hard-mode-title"

@@ -19,6 +19,14 @@ export function shouldSubmitInsteadOfButton(currentGuess, currentGuessIndex, won
   return currentGuess.length === 5 && currentGuessIndex < 6 && !won;
 }
 
+export function trapTab(currentIndex, count, shiftKey, inside) {
+  if (count <= 0) return { prevent: false, index: 0 };
+  if (!inside) return { prevent: true, index: shiftKey ? count - 1 : 0 };
+  if (shiftKey && currentIndex <= 0) return { prevent: true, index: count - 1 };
+  if (!shiftKey && currentIndex >= count - 1) return { prevent: true, index: 0 };
+  return { prevent: false, index: currentIndex };
+}
+
 export function trackDialogEnter(swallowEnterUp, { type, key, dialogOpen, repeat }) {
   if (key !== "Enter") return { swallowEnterUp, ignore: false };
   if (type === "down" && dialogOpen) return { swallowEnterUp: true, ignore: false };
