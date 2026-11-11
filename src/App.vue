@@ -6,7 +6,7 @@ import TickSoundSrc from '/sounds/tick.mp3'
 import WinSoundSrc from '/sounds/win.mp3'
 import LoseSoundSrc from '/sounds/lose.mp3'
 import WordList from './assets/wordlist.json'
-import { gameHasProgress, normalizeKey, shouldSubmitInsteadOfButton, trackDialogEnter, trapTab } from './game.js'
+import { gameHasProgress, normalizeKey, shouldPreserveKeyDefault, shouldSubmitInsteadOfButton, trackDialogEnter, trapTab } from './game.js'
 
 const HARD_MODE_KEY = "wordle-hard-mode"
 
@@ -226,7 +226,8 @@ const onKeyUp = (event) => {
   }
   if (confirmHardMode.value) {
     if (event.key === "Escape") cancelHardModeSwitch()
-    event.preventDefault()
+    const insideDialog = dialogPanel.value?.contains(document.activeElement)
+    if (!shouldPreserveKeyDefault(event.key, true, insideDialog)) event.preventDefault()
     return
   }
   event.preventDefault()

@@ -19,6 +19,10 @@ export function shouldSubmitInsteadOfButton(currentGuess, currentGuessIndex, won
   return currentGuess.length === 5 && currentGuessIndex < 6 && !won;
 }
 
+export function shouldPreserveKeyDefault(key, dialogOpen, insideDialog) {
+  return dialogOpen && key === " " && insideDialog;
+}
+
 export function trapTab(currentIndex, count, shiftKey, inside) {
   if (count <= 0) return { prevent: false, index: 0 };
   if (!inside) return { prevent: true, index: shiftKey ? count - 1 : 0 };
