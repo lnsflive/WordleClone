@@ -224,12 +224,14 @@ const onKeyUp = (event) => {
     event.preventDefault()
     return
   }
+  const insideDialog = !!dialogPanel.value?.contains(document.activeElement)
+  const onGameControl = !!document.activeElement?.closest?.("[data-game-control]")
   if (confirmHardMode.value) {
     if (event.key === "Escape") cancelHardModeSwitch()
-    const insideDialog = dialogPanel.value?.contains(document.activeElement)
     if (!shouldPreserveKeyDefault(event.key, true, insideDialog)) event.preventDefault()
     return
   }
+  if (shouldPreserveKeyDefault(event.key, false, false, onGameControl)) return
   event.preventDefault()
   handleInput(event.key)
 }

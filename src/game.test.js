@@ -49,6 +49,13 @@ test("shouldPreserveKeyDefault lets Space activate a dialog button", () => {
   assert.equal(shouldPreserveKeyDefault(" ", false, true), false);
 });
 
+test("shouldPreserveKeyDefault lets Space activate a game control", () => {
+  assert.equal(shouldPreserveKeyDefault(" ", false, false, true), true);
+  assert.equal(shouldPreserveKeyDefault(" ", false, false, false), false);
+  assert.equal(shouldPreserveKeyDefault("Enter", false, false, true), false);
+  assert.equal(shouldPreserveKeyDefault(" ", true, false, true), false);
+});
+
 test("trapTab keeps Tab inside the confirmation buttons", () => {
   assert.deepEqual(trapTab(1, 2, false, true), { prevent: true, index: 0 });
   assert.deepEqual(trapTab(0, 2, true, true), { prevent: true, index: 1 });
