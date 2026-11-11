@@ -13,11 +13,10 @@ const props = defineProps({
 })
 
 const pulse = ref(false);
-const selected = ref(props.letter);
 watch(
   () => props.letter,
-  (selected, prevSelected) => {
-    if (selected && selected.length > 0) {
+  (letter) => {
+    if (letter && letter.length > 0) {
       pulse.value = true;
       setTimeout(() => {
         pulse.value = false;

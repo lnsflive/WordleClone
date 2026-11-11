@@ -1,26 +1,52 @@
 <script setup>
 import SimpleKeyboard from './components/SimpleKeyboard.vue';
-import { reactive, onMounted, computed} from 'vue'
+import { reactive, ref, onMounted, onUnmounted, computed, watch, nextTick } from 'vue'
 import WordRow from './components/WordRow.vue';
 import TickSoundSrc from '/sounds/tick.mp3'
-import SpinSoundSrc from '/sounds/spin.mp3'
 import WinSoundSrc from '/sounds/win.mp3'
 import LoseSoundSrc from '/sounds/lose.mp3'
 import WordList from './assets/wordlist.json'
+import { gameHasProgress, normalizeKey, shouldPreserveKeyDefault, shouldSubmitInsteadOfButton, trackDialogEnter, trapTab } from './game.js'
+
+const HARD_MODE_KEY = "wordle-hard-mode"
+
+const readHardMode = () => {
+  try {
+    return localStorage.getItem(HARD_MODE_KEY) === "1"
+  } catch {
+    return false
+  }
+}
+
+const writeHardMode = (enabled) => {
+  try {
+    localStorage.setItem(HARD_MODE_KEY, enabled ? "1" : "0")
+    return true
+  } catch {
+    return false
+  }
+}
 
 let tick = new Audio(TickSoundSrc)
-let spin = new Audio(SpinSoundSrc)
 let win = new Audio(WinSoundSrc)
 let lose = new Audio(LoseSoundSrc)
+let errorTimer = 0
+let swallowEnterUp = false
+const confirmHardMode = ref(false)
+const cancelButton = ref(null)
+const dialogPanel = ref(null)
+const roundId = ref(0)
+
+const play = (audio) => {
+  audio.play().catch(() => {})
+}
 
 const state = reactive({
   solution: "",
   guesses: ["","","","","",""],
   availableWords: WordList.words,
-  //availableWords: ["aargh", "aback", "abaft", "about", "above", "abuse", "accel", "actor", "acute", "adieu", "adios", "admit", "adopt", "adown", "adult", "afoot", "afore", "afoul", "after", "again", "agape", "agent", "agree", "ahead", "ahull", "alack", "alarm", "album", "alcon", "alert", "alife", "alike", "aline", "alive", "allow", "aloft", "aloha", "alone", "along", "aloof", "aloud", "alter", "amiss", "among", "amply", "amuck", "anger", "Angle", "angry", "apace", "apart", "apple", "apply", "aptly", "arear", "arena", "argue", "arise", "array", "aside", "askew", "asset", "audio", "audit", "aught", "avast", "avoid", "award", "aware", "awful", "badly", "bakaw", "baker", "bally", "bases", "basic", "basis", "beach", "began", "begin", "begun", "being", "below", "bench", "billy", "birth", "black", "blame", "bless", "blige", "blind", "block", "blood", "board", "boost", "booth", "bothe", "bound", "brain", "brand", "brava", "brave", "bravo", "bread", "break", "breed", "brief", "bring", "broad", "broke", "brown", "build", "built", "burst", "buyer", "cable", "calif", "canny", "carry", "catch", "cause", "chain", "chair", "chart", "chase", "cheap", "check", "chest", "chief", "child", "china", "chook", "chose", "circa", "civil", "claim", "class", "clean", "clear", "click", "climb", "clock", "close", "coach", "coast", "could", "count", "court", "cover", "coyly", "craft", "crash", "crazy", "cream", "crime", "cross", "crowd", "crown", "curve", "cycle", "daily", "damme", "dance", "dated", "dealt", "death", "debut", "delay", "depth", "dildo", "dimly", "dirty", "ditto", "doing", "doubt", "dozen", "draft", "drama", "drawn", "dream", "dress", "drill", "drily", "drink", "drive", "drove", "dryly", "dully", "dying", "eager", "early", "earth", "eight", "elite", "empty", "enemy", "enjoy", "enter", "entry", "equal", "error", "event", "every", "exact", "exist", "extra", "faint", "faith", "false", "fatly", "fault", "feyly", "fiber", "field", "fifth", "fifty", "fight", "final", "first", "fitly", "fixed", "flash", "fleet", "floor", "fluid", "focus", "force", "forte", "forth", "forty", "forum", "found", "frame", "frank", "fraud", "fresh", "frick", "front", "fruit", "fudge", "fully", "funky", "funny", "furth", "gaily", "gayly", "giant", "given", "glass", "globe", "godly", "going", "golly", "grace", "grade", "grand", "grant", "grass", "gratz", "great", "green", "gross", "group", "grown", "guard", "guess", "guest", "guide", "hallo", "haply", "happy", "harry", "harsh", "hasta", "havoc", "heart", "heavy", "hella", "hello", "hence", "henry", "horse", "hotel", "hotly", "house", "howay", "howdy", "hullo", "human", "huzza", "icily", "ideal", "image", "imply", "index", "infra", "inner", "input", "issue", "japan", "jesus", "jildi", "jimmy", "joint", "jolly", "jones", "judge", "knife", "known", "label", "large", "laser", "later", "laugh", "laura", "laxly", "layer", "learn", "lease", "least", "leave", "legal", "lento", "level", "lewis", "light", "limit", "links", "lives", "local", "logic", "loose", "lordy", "lower", "lowly", "lucky", "lunch", "lying", "madly", "magic", "major", "maker", "march", "maria", "marry", "match", "maybe", "mayor", "meant", "media", "mercy", "metal", "might", "minor", "minus", "mixed", "model", "money", "month", "moral", "motor", "mount", "mouse", "mouth", "movie", "music", "naked", "nasty", "naval", "neath", "needs", "never", "newly", "night", "nobly", "noise", "north", "noted", "novel", "nurse", "occur", "ocean", "oddly", "offer", "often", "one’s", "order", "other", "ought", "outer", "owner", "paint", "panel", "paper", "party", "peace", "peter", "phase", "phone", "photo", "piano", "piece", "pilot", "pitch", "place", "plain", "plane", "plant", "plate", "plonk", "plumb", "point", "pound", "power", "press", "price", "pride", "prime", "print", "prior", "prize", "proof", "proud", "prove", "psych", "queen", "queer", "quick", "quiet", "quite", "radio", "raise", "ramen", "range", "rapid", "ratio", "reach", "ready", "redly", "refer", "relax", "reply", "right", "rival", "river", "robin", "roger", "roman", "rough", "round", "route", "royal", "rugby", "rural", "sadly", "salve", "scale", "scene", "scope", "score", "sense", "serve", "seven", "shall", "shape", "share", "sharp", "sheep", "sheer", "sheet", "shelf", "shell", "shift", "shily", "shirt", "shock", "shoot", "short", "shown", "shyly", "sight", "silly", "simon", "since", "sixth", "sixty", "sized", "skill", "slash", "sleek", "sleep", "slide", "slyly", "small", "smart", "smile", "smith", "smoke", "sniff", "so-so", "solid", "solve", "sorry", "sound", "south", "space", "spang", "spare", "speak", "speed", "spend", "spent", "spite", "split", "spoke", "sport", "squad", "staff", "stage", "stake", "stand", "stark", "start", "state", "steam", "steel", "steep", "stick", "still", "stock", "stone", "stood", "store", "storm", "story", "strip", "stuck", "study", "stuff", "style", "sugar", "suite", "super", "sweet", "table", "taken", "tally", "taste", "taxes", "teach", "teeth", "terry", "texas", "thame", "thank", "theft", "their", "theme", "there", "these", "thiam", "thick", "thine", "thing", "think", "third", "those", "three", "threw", "throw", "thwap", "tight", "times", "tired", "title", "today", "topic", "total", "touch", "tough", "tower", "track", "trade", "train", "treat", "trend", "trial", "tried", "tries", "truck", "truly", "trust", "truth", "twice", "uncle", "under", "undue", "union", "unity", "until", "upper", "upset", "urban", "usage", "usual", "utter", "vague", "valid", "value", "video", "viola", "virus", "visit", "vital", "voice", "wacko", "wanly", "waste", "watch", "water", "wetly", "wheel", "where", "which", "while", "whist", "white", "whole", "whose", "whoso", "wilma", "wirra", "woman", "women", "woops", "world", "worry", "worse", "worst", "worth", "would", "wound", "wowie", "write", "wrong", "wrote", "yecch", "yeeha", "yeesh", "yield", "young", "yours", "youth", "yowch", "zowie"],
-  //allWords: WordList.words,
   currentGuessIndex: 0,
-  hardMode: false,
+  hardMode: readHardMode(),
   error: "",
   guessedLetters: {
     miss: [],
@@ -29,115 +55,212 @@ const state = reactive({
   }
 })
 
-const wonGame = computed(
-  () => {
-    if(state.guesses[state.currentGuessIndex - 1] === state.solution){
-      win.play()
-      return true
+const wonGame = computed(() =>
+  state.currentGuessIndex > 0 &&
+  state.guesses[state.currentGuessIndex - 1] === state.solution
+)
+
+const lostGame = computed(() =>
+  !wonGame.value && state.currentGuessIndex >= 6
+)
+
+watch(wonGame, (won) => {
+  if (won) play(win)
+})
+
+watch(lostGame, (lost) => {
+  if (lost) play(lose)
+})
+
+const pickSolution = () => {
+  const words = state.availableWords
+  return words[Math.floor(Math.random() * words.length)].toLowerCase()
+}
+
+const resetRound = () => {
+  state.solution = pickSolution()
+  state.guesses = ["", "", "", "", "", ""]
+  state.currentGuessIndex = 0
+  state.error = ""
+  state.guessedLetters = { miss: [], found: [], hint: [] }
+  window.clearTimeout(errorTimer)
+  roundId.value += 1
+}
+
+const refreshPage = (event) => {
+  if (confirmHardMode.value) return
+  resetRound()
+  event?.currentTarget?.blur?.()
+}
+
+const cancelHardModeSwitch = () => {
+  confirmHardMode.value = false
+}
+
+const confirmHardModeSwitch = () => {
+  state.hardMode = !state.hardMode
+  writeHardMode(state.hardMode)
+  confirmHardMode.value = false
+  resetRound()
+}
+
+const requestHardModeToggle = (event) => {
+  if (confirmHardMode.value) return
+  const currentGuess = state.guesses[state.currentGuessIndex] || ""
+  if (!gameHasProgress(state.currentGuessIndex, currentGuess)) {
+    state.hardMode = !state.hardMode
+    writeHardMode(state.hardMode)
+    event?.currentTarget?.blur?.()
+    return
+  }
+  confirmHardMode.value = true
+}
+
+watch(confirmHardMode, async (open) => {
+  if (!open) return
+  await nextTick()
+  cancelButton.value?.focus()
+})
+
+const showError = (message) => {
+  state.error = message
+  window.clearTimeout(errorTimer)
+  errorTimer = window.setTimeout(() => {
+    state.error = ""
+  }, 2500)
+}
+
+const recordGuess = (currentGuess) => {
+  state.currentGuessIndex++
+  for (let i = 0; i < currentGuess.length; i++) {
+    const c = currentGuess.charAt(i)
+    if (c === state.solution.charAt(i)) {
+      state.guessedLetters.found.push(c)
+    } else if (state.solution.includes(c)) {
+      state.guessedLetters.hint.push(c)
+    } else {
+      state.guessedLetters.miss.push(c)
     }
   }
-)
-const lostGame = computed(() => {
-  if(!wonGame.value
-  && state.currentGuessIndex >= 6){
-    lose.play()
-    return true
-  }
-}
-)
-
-const refreshPage = () => {
-  window.location.reload();
-}
-
-const resetError = () => {
-  state.error = ".";
-  state.guesses[state.currentGuessIndex] = ""
+  play(tick)
 }
 
 const handleInput = (key) => {
-  if (state.currentGuessIndex >= 6 || wonGame.value){
-    return;
+  if (confirmHardMode.value || state.currentGuessIndex >= 6 || wonGame.value) {
+    return
   }
+
+  const normalized = normalizeKey(key)
+  if (!normalized) return
 
   const currentGuess = state.guesses[state.currentGuessIndex]
 
-  if(key == "{enter}"){
-    if(currentGuess.length == 5){
-      state.error = ""
-      if(state.hardMode){
-        if(state.availableWords.includes(currentGuess)){
-          state.currentGuessIndex++
-          for(var i = 0; i < currentGuess.length; i++){
-            let c = currentGuess.charAt(i)
-            if(c == state.solution.charAt(i)){
-              state.guessedLetters.found.push(c)
-            } else if(state.solution.indexOf(c) != -1){
-              state.guessedLetters.hint.push(c)
-            } else{
-              state.guessedLetters.miss.push(c)
-            }
-          } 
-          tick.play()
-        }else{
-          state.error = "⚠️ Real Words only in Hard Mode!"
-          setTimeout(resetError, 2500)
-          return
-        }
-      }else{
-        state.currentGuessIndex++
-        for(var i = 0; i < currentGuess.length; i++){
-          let c = currentGuess.charAt(i)
-          if(c == state.solution.charAt(i)){
-            state.guessedLetters.found.push(c)
-          } else if(state.solution.indexOf(c) != -1){
-            state.guessedLetters.hint.push(c)
-          } else{
-            state.guessedLetters.miss.push(c)
-          }
-        } 
-        tick.play()
-      }
+  if (normalized === "{enter}") {
+    if (currentGuess.length !== 5) return
+    state.error = ""
+    if (state.hardMode && !state.availableWords.includes(currentGuess)) {
+      showError("⚠️ Real Words only in Hard Mode!")
+      return
     }
-  } else if (key == "{bksp}"){
-    state.guesses[state.currentGuessIndex] = 
-      currentGuess.slice(0,-1)
-    tick.play()
-  } else if(currentGuess.length < 5){
-    const alphaRegex = /[a-zA-Z]/
-    if(alphaRegex.test(key)){
-      state.guesses[state.currentGuessIndex] += key.toLowerCase()
-      tick.play()
-    }
+    recordGuess(currentGuess)
+    return
+  }
+
+  if (normalized === "{bksp}") {
+    state.guesses[state.currentGuessIndex] = currentGuess.slice(0, -1)
+    play(tick)
+    return
+  }
+
+  if (currentGuess.length < 5) {
+    state.guesses[state.currentGuessIndex] += normalized
+    play(tick)
   }
 }
 
-onMounted(() => {
-  console.log(state.availableWords.length)
-  let excludedKeys = ["Alt", "Shift", "Control", "Escape", "Tab", "CapsLock", "NumLock"]
-  window.addEventListener("keyup", (e) => {
-    e.preventDefault()
-    if(!excludedKeys.includes(e.key)){
-      let key =
-        e.key == "Enter"
-          ? "{enter}"
-          : e.key == "Backspace"
-          ? "{bksp}"
-          : e.key
-      handleInput(key)
-    }
+const noteEnter = (type, event) => {
+  const next = trackDialogEnter(swallowEnterUp, {
+    type,
+    key: event.key,
+    dialogOpen: confirmHardMode.value,
+    repeat: event.repeat,
   })
-  state.solution = state.availableWords[Math.floor(Math.random() * state.availableWords.length)].toLowerCase()
-  //console.log(state.solution)
+  swallowEnterUp = next.swallowEnterUp
+  return next.ignore
+}
+
+const dialogButtons = () => {
+  const panel = dialogPanel.value
+  return panel ? [...panel.querySelectorAll("button")] : []
+}
+
+const onKeyDown = (event) => {
+  noteEnter("down", event)
+  if (confirmHardMode.value && event.key === "Tab") {
+    const buttons = dialogButtons()
+    const index = buttons.indexOf(document.activeElement)
+    const decision = trapTab(index, buttons.length, event.shiftKey, index !== -1)
+    if (decision.prevent) {
+      event.preventDefault()
+      buttons[decision.index]?.focus()
+    }
+    return
+  }
+  if (confirmHardMode.value && (event.key === "Enter" || event.key === " ")) {
+    if (!dialogPanel.value?.contains(document.activeElement)) event.preventDefault()
+    return
+  }
+  if (confirmHardMode.value || event.key !== "Enter") return
+  const gameControl = event.target?.closest?.("[data-game-control]")
+  if (!gameControl) return
+  const currentGuess = state.guesses[state.currentGuessIndex] || ""
+  if (shouldSubmitInsteadOfButton(currentGuess, state.currentGuessIndex, wonGame.value)) {
+    event.preventDefault()
+  }
+}
+
+const onKeyUp = (event) => {
+  if (noteEnter("up", event)) {
+    event.preventDefault()
+    return
+  }
+  const insideDialog = !!dialogPanel.value?.contains(document.activeElement)
+  const onGameControl = !!document.activeElement?.closest?.("[data-game-control]")
+  if (confirmHardMode.value) {
+    if (event.key === "Escape") cancelHardModeSwitch()
+    if (!shouldPreserveKeyDefault(event.key, true, insideDialog)) event.preventDefault()
+    return
+  }
+  if (shouldPreserveKeyDefault(event.key, false, false, onGameControl)) return
+  event.preventDefault()
+  handleInput(event.key)
+}
+
+onMounted(() => {
+  window.addEventListener("keydown", onKeyDown)
+  window.addEventListener("keyup", onKeyUp)
+  state.solution = pickSolution()
+})
+
+onUnmounted(() => {
+  window.removeEventListener("keydown", onKeyDown)
+  window.removeEventListener("keyup", onKeyUp)
+  window.clearTimeout(errorTimer)
 })
 </script>
 
 <template>
-  <div class="bg-white flex flex-col h-screen max-w-md mx-auto justify-evenly">
+  <div class="bg-white h-screen max-w-md mx-auto">
+    <div
+      class="flex h-full flex-col justify-evenly"
+      :inert="confirmHardMode || null"
+    >
     <div class="grid grid-cols-6">
       <button
-        class="bg-green-600 text-white rounded p-4 font-bold col-span-2 mx-auto"
-        @click="refreshPage()"
+        type="button"
+        data-game-control
+        class="bg-green-600 text-white rounded p-4 font-bold col-span-2 mx-auto border-0"
+        @click="refreshPage"
       >
         Play Again?
       </button>
@@ -147,18 +270,20 @@ onMounted(() => {
           <div class="myBtnPurple" />
       </a>
     </div>
-      <div
-        class="text-center cursor-pointer text-white rounded flex items-center p-4 font-bold col-span-2 mx-auto"
-        @click="state.hardMode = !state.hardMode"
+      <button
+        type="button"
+        data-game-control
+        class="text-center cursor-pointer text-white rounded flex items-center p-4 font-bold col-span-2 mx-auto border-0"
+        @click="requestHardModeToggle"
         :class="[state.hardMode ? 'bg-red-500' : 'bg-orange-500']"
       >
         Hard Mode: {{state.hardMode ? 'Y' : 'N'}}
-      </div>
+      </button>
     </div>
     <div>
       <word-row
         v-for="(guess, i) in state.guesses"
-        :key="i"
+        :key="`${roundId}-${i}`"
         :value="guess"
         :solution="state.solution"
         :submitted="i < state.currentGuessIndex"
@@ -176,9 +301,46 @@ onMounted(() => {
       </p>
     </div>
     <simple-keyboard
+      :key="roundId"
       @onKeyPress="handleInput"
       :guessedLetters="state.guessedLetters"
     />
+    </div>
+    <div
+      v-if="confirmHardMode"
+      class="fixed inset-0 z-20 flex items-center justify-center bg-black/40 px-6"
+      @click.self="cancelHardModeSwitch"
+    >
+      <div
+        ref="dialogPanel"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="hard-mode-title"
+        class="w-full max-w-sm rounded bg-white p-6 text-center shadow-lg"
+      >
+        <h2 id="hard-mode-title" class="text-lg font-bold">Start a new game?</h2>
+        <p class="mt-2 text-sm text-gray-700">
+          Hard mode is for the whole puzzle. Switching it clears this board and picks a new word.
+        </p>
+        <div class="mt-5 flex justify-center gap-3">
+          <button
+            ref="cancelButton"
+            type="button"
+            class="rounded bg-gray-200 px-4 py-2 font-bold"
+            @click="cancelHardModeSwitch"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="rounded bg-green-600 px-4 py-2 font-bold text-white"
+            @click="confirmHardModeSwitch"
+          >
+            New game
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
